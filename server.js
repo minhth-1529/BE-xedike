@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const userRouter = require('./routers/api/user');
-const tripRouter = require('./routers/api/trip');
+const userRouter = require('./routers/api/User');
+const tripRouter = require('./routers/api/Trip');
+const provinceRouter = require('./routers/api/Province');
 
 mongoose
     .connect('mongodb://localhost:27017/prj-xedike', {
@@ -39,6 +40,7 @@ app.use(express.json());
 // middleware router handler
 app.use('/api/users', userRouter);
 app.use('/api/trips', tripRouter);
+app.use('/api/provinces', provinceRouter);
 
 app.listen(port, () => {
     console.log(`Server running!!!!!!!!! ${port}`);

@@ -1,5 +1,7 @@
 const { Trip } = require('../../../models/Trip');
 const url = require('url');
+const _ = require('lodash');
+
 // * Delete Trip
 module.exports.deleteTrip = (req, res, next) => {
     const { id } = req.params;
@@ -32,7 +34,7 @@ module.exports.getDetailTrip = (req, res, next) => {
 // * Get trips
 module.exports.getTrip = (req, res, next) => {
     Trip.find()
-        .populate('driverID',"fullName")
+        .populate('driverID', 'fullName')
         // .select('driverID')
         .then(trips => {
             res.status(200).json(trips);
@@ -117,9 +119,29 @@ module.exports.finishTrip = (req, res, next) => {
 };
 
 // * Search
-module.exports.searchTrips = (req, res, next) =>{
-    const { queryString } = req.params;
-    
-    const abc = url.parse(req.url,true).query
-    console.log(abc);
-}
+module.exports.searchTrips = (req, res, next) => {
+    let queryString = url.parse(
+        req.url.substring(0, req.url.lastIndexOf('/')),
+        true
+    ).query;
+
+    Trip.find()
+        .and([
+            { locationFrom: queryString.from },
+            { locationTo: queryString.to },
+            { availableSeats: { $gte: parseInt(queryString.slot) } }
+            // { startTime: { $gte: parseInt(queryString.startTime) } }
+        ])
+        .populate('driverID', 'fullName')
+        .then(trip => {
+            if (_.isEmpty(trip))
+                return Promise.reject({ status: 404, message: 'Not found!' });
+
+            res.status(200).json(trip);
+        })
+        .catch(err => {
+            if (!err.status) return res.json(err);
+
+            res.status(err.status).json({ message: err.message });
+        });
+};
