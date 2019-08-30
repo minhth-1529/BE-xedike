@@ -129,7 +129,7 @@ module.exports.searchTrips = (req, res, next) => {
         .and([
             { locationFrom: queryString.from },
             { locationTo: queryString.to },
-            { availableSeats: { $gte: parseInt(queryString.slot) } }
+            // { availableSeats: { $gte: parseInt(queryString.slot) } }
             // { startTime: { $gte: parseInt(queryString.startTime) } }
         ])
         .populate('driverID', 'fullName')
