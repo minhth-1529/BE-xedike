@@ -67,32 +67,36 @@ module.exports.getDetailUser = (req, res, next) => {
 };
 
 // * Update user
-module.exports.updateUser = (req, res, next) => {
+module.exports.updateUser = async (req, res, next) => {
     const { id } = req.params;
+    const { errors, isValid } = await validatePostInput(req.body);
+    const { password, newPassword } = req.body;
 
     User.findById(id)
         .then(user => {
-            if (!user)
-                return Promise.reject({
-                    status: 404,
-                    message: 'User not found'
-                });
-
             Object.keys(req.body).forEach(field => {
                 user[field] = req.body[field];
             });
 
-            bcryptjs.genSalt(10, (err, salt) => {
-                if (err) return res.json(err);
-                bcryptjs.hash(user.password, salt, (err, hash) => {
-                    if (err) return res.json(err);
-                    user.password = hash;
+            if (!isValid) return res.status(400).json(errors);
 
-                    user.save()
-                        .then(user => {
-                            res.status(200).json(user);
-                        })
-                        .catch(err => res.json(err));
+            bcryptjs.compare(password, user.password, (err, isMatch) => {
+                if (!isMatch)
+                    return res.status(404).json('Password is incorrect!');
+
+                bcryptjs.genSalt(10, (err, salt) => {
+                    if (err) return res.json(err);
+                    bcryptjs.hash(newPassword, salt, (err, hash) => {
+                        if (err) return res.json(err);
+
+                        user.password = hash;
+
+                        user.save()
+                            .then(user => {
+                                res.status(204).json(user);
+                            })
+                            .catch(err => res.json(err));
+                    });
                 });
             });
         })
@@ -131,7 +135,8 @@ module.exports.login = (req, res, next) => {
                 const payload = {
                     email: user.email,
                     userType: user.userType,
-                    id: user._id
+                    id: user._id,
+                    fullName: user.fullName
                 };
 
                 jwt.sign(
@@ -159,7 +164,7 @@ module.exports.login = (req, res, next) => {
         });
 };
 
-// * Update avatar user
+// * Upload avatar user
 module.exports.uploadAvatar = (req, res, next) => {
     const { id } = req.params;
 
@@ -168,7 +173,7 @@ module.exports.uploadAvatar = (req, res, next) => {
             if (!user)
                 return Promise.reject({
                     status: 404,
-                    message: 'User not found'
+                    message: 'user not found'
                 });
 
             user.avatar = req.file.path;

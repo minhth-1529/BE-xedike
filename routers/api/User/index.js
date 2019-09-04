@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('./controller');
 const { author, authen } = require('../../../middlewares/author');
-// const uploadImage = require('../../../middlewares/uploadImg');
+const uploadImage = require('../../../middlewares/uploadImg');
 
 router.get('/', userController.getUsers);
 router.post('/', userController.createUser);
@@ -15,10 +15,10 @@ router.delete(
     userController.deleteUser
 );
 router.post('/login', userController.login);
-// router.post(
-//     '/upload-avatar/:id',
-//     uploadImage('avatar'),
-//     userController.uploadAvatar
-// );
+router.post(
+    '/upload-avatar/:id',
+    uploadImage('avatar'),
+    userController.uploadAvatar
+);
 
 module.exports = router;
