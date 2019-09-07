@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('./controller');
-const { author, authen } = require('../../../middlewares/author');
+const { authorize, authenticate } = require('../../../middlewares/auth');
 const uploadImage = require('../../../middlewares/uploadImg');
 
 router.get('/', userController.getUsers);
 router.post('/', userController.createUser);
 router.get('/:id', userController.getDetailUser);
-router.put('/:id', userController.updateUser);
+router.put('/personal/:id', userController.updatePersonalUser);
+router.put('/password/:id', userController.updatePasswordUser);
 router.delete(
     '/:id',
-    authen,
-    author(['cus', 'user']),
+    authenticate,
+    authorize(['cus', 'user']),
     userController.deleteUser
 );
 router.post('/login', userController.login);

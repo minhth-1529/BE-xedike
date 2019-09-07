@@ -16,7 +16,10 @@ const TripSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User'
             },
-            numberOfBookingSeats: Number
+            locationFrom: String,
+            locationTo: String,
+            numberOfBookingSeats: Number,
+            note: String
         }
     ],
     isFinished: { type: Boolean, default: false }

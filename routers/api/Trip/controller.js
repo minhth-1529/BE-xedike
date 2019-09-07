@@ -18,12 +18,6 @@ module.exports.getDetailTrip = (req, res, next) => {
         // .populate('id', 'avatar') lay avatar
         .populate('driverID')
         .then(trip => {
-            if (!trip)
-                return Promise.reject({
-                    status: 404,
-                    message: 'khong co trip'
-                });
-
             res.status(200).json(trip);
         })
         .catch(err => {
@@ -35,7 +29,6 @@ module.exports.getDetailTrip = (req, res, next) => {
 module.exports.getTrip = (req, res, next) => {
     Trip.find()
         .populate('driverID', 'fullName')
-        // .select('driverID')
         .then(trips => {
             res.status(200).json(trips);
         })
@@ -71,30 +64,35 @@ module.exports.createTrips = (req, res, next) => {
         .catch(err => res.json(err));
 };
 
-module.exports.bookTrip = (req, res, next) => {
+module.exports.bookingTrip = (req, res, next) => {
     const passengerID = req.user.id;
 
-    const { numberOfBookingSeats } = req.body;
+    const { numberOfBookingSeats, locationFrom, locationTo, note } = req.body;
 
     const { id } = req.params;
 
     Trip.findById(id)
         .then(trip => {
             if (trip.availableSeats < numberOfBookingSeats)
-                return Promise.reject({ status: 400, message: 'k du ghe' });
+                return Promise.reject({
+                    status: 400,
+                    message: 'Not enough slot'
+                });
 
             const passenger = {
                 passengerID,
-                numberOfBookingSeats
+                numberOfBookingSeats,
+                locationFrom,
+                locationTo,
+                note
             };
 
             trip.passengers.push(passenger);
             trip.availableSeats = trip.availableSeats - numberOfBookingSeats;
-            console.log(trip);
+
             return trip.save();
         })
         .then(trip => {
-            console.log(trip);
             res.status(200).json(trip);
         })
         .catch(err => {
@@ -128,7 +126,7 @@ module.exports.searchTrips = (req, res, next) => {
     Trip.find()
         .and([
             { locationFrom: queryString.from },
-            { locationTo: queryString.to },
+            { locationTo: queryString.to }
             // { availableSeats: { $gte: parseInt(queryString.slot) } }
             // { startTime: { $gte: parseInt(queryString.startTime) } }
         ])

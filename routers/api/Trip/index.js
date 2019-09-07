@@ -1,14 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { author, authen } = require('../../../middlewares/author');
+const { authorize, authenticate } = require('../../../middlewares/auth');
 const tripController = require('./controller');
 
-router.post('/', authen, author(['driver']), tripController.createTrips);
+router.post(
+    '/',
+    authenticate,
+    authorize(['driver']),
+    tripController.createTrips
+);
 router.get('/', tripController.getTrip);
 router.post('/search?:queryString', tripController.searchTrips);
 // router.get('/:id', tripController.getDetailTrip);
 // router.post('/:id', tripController.deleteTrip);
-// router.put('/booking-trip/:id', authen, tripController.bookTrip);
-// router.put('/finish-trip/:id', authen, tripController.finishTrip);
+router.put('/booking-trip/:id', authenticate, tripController.bookingTrip);
+// router.put('/finish-trip/:id', authenticate, tripController.finishTrip);
 
 module.exports = router;

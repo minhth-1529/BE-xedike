@@ -2,6 +2,8 @@ const { User } = require('../../../models/User');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validatePostInput = require('../../../validations/User/ValidatePostInput');
+const ValidatePutPersonalInput = require('../../../validations/User/ValidatePutPersonalInput');
+const ValidatePutPasswordInput = require('../../../validations/User/ValidatePutPasswordInput');
 
 // * Get user list
 module.exports.getUsers = (req, res, next) => {
@@ -67,17 +69,53 @@ module.exports.getDetailUser = (req, res, next) => {
 };
 
 // * Update user
-module.exports.updateUser = async (req, res, next) => {
+// module.exports.updateUser = async (req, res, next) => {
+//     const { id } = req.params;
+//     const { errors, isValid } = await ValidatePutPersonalInput(req.body);
+//     const { password, newPassword } = req.body;
+
+//     User.findById(id)
+//         .then(user => {
+//             Object.keys(req.body).forEach(field => {
+//                 user[field] = req.body[field];
+//             });
+
+//             if (!isValid) return res.status(400).json(errors);
+
+//             bcryptjs.compare(password, user.password, (err, isMatch) => {
+//                 if (!isMatch)
+//                     return res.status(404).json('Password is incorrect!');
+
+//                 bcryptjs.genSalt(10, (err, salt) => {
+//                     if (err) return res.json(err);
+//                     bcryptjs.hash(newPassword, salt, (err, hash) => {
+//                         if (err) return res.json(err);
+
+//                         user.password = hash;
+
+//                         user.save()
+//                             .then(user => {
+//                                 res.status(204).json(user);
+//                             })
+//                             .catch(err => res.json(err));
+//                     });
+//                 });
+//             });
+//         })
+//         .catch(err => {
+//             if (!err.status) return res.json(err);
+
+//             res.status(err.status).json(err.message);
+//         });
+// };
+
+module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
-    const { errors, isValid } = await validatePostInput(req.body);
-    const { password, newPassword } = req.body;
+    const { errors, isValid } = await ValidatePutPasswordInput(req.body);
+    const { password } = req.body;
 
     User.findById(id)
         .then(user => {
-            Object.keys(req.body).forEach(field => {
-                user[field] = req.body[field];
-            });
-
             if (!isValid) return res.status(400).json(errors);
 
             bcryptjs.compare(password, user.password, (err, isMatch) => {
@@ -88,7 +126,6 @@ module.exports.updateUser = async (req, res, next) => {
                     if (err) return res.json(err);
                     bcryptjs.hash(newPassword, salt, (err, hash) => {
                         if (err) return res.json(err);
-
                         user.password = hash;
 
                         user.save()
@@ -99,6 +136,31 @@ module.exports.updateUser = async (req, res, next) => {
                     });
                 });
             });
+        })
+        .catch(err => {
+            if (!err.status) return res.json(err);
+
+            res.status(err.status).json(err.message);
+        });
+};
+
+module.exports.updatePersonalUser = async (req, res) => {
+    const { id } = req.params;
+    const { errors, isValid } = await ValidatePutPersonalInput(req.body);
+
+    User.findById(id)
+        .then(user => {
+            if (!isValid) return res.status(400).json(errors);
+
+            Object.keys(req.body).forEach(field => {
+                user[field] = req.body[field];
+            });
+
+            user.save()
+                .then(user => {
+                    res.status(201).json(user);
+                })
+                .catch(err => res.json(err));
         })
         .catch(err => {
             if (!err.status) return res.json(err);
