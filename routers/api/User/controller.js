@@ -1,9 +1,13 @@
 const { User } = require('../../../models/User');
+const { Car } = require('../../../models/Car');
+const { Trip } = require('../../../models/Trip');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validatePostInput = require('../../../validations/User/ValidatePostInput');
 const ValidatePutPersonalInput = require('../../../validations/User/ValidatePutPersonalInput');
 const ValidatePutPasswordInput = require('../../../validations/User/ValidatePutPasswordInput');
+const moment = require('moment');
+const _ = require('lodash');
 
 // * Get user list
 module.exports.getUsers = (req, res, next) => {
@@ -53,18 +57,17 @@ module.exports.createUser = async (req, res, next) => {
 module.exports.getDetailUser = (req, res, next) => {
     const { id } = req.params;
 
-    User.findById(id)
-        .then(user => {
-            if (!user)
-                return Promise.reject({
-                    status: 404,
-                    message: 'User not found'
-                });
+    Promise.all([
+        User.findById(id).select('-password -userType -_id -__v'),
+        Car.find({ driverID: id })
+    ])
+        .then(results => {
+            const [user, cars] = results;
 
-            res.status(200).json(user);
+            res.status(200).json({ user: user, cars: cars });
         })
         .catch(err => {
-            res.status(err.status).json({ message: err.message });
+            res.status(err.status).json(err);
         });
 };
 
@@ -109,6 +112,7 @@ module.exports.getDetailUser = (req, res, next) => {
 //         });
 // };
 
+// * Update user password
 module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
     const { errors, isValid } = await ValidatePutPasswordInput(req.body);
@@ -144,6 +148,7 @@ module.exports.updatePasswordUser = async (req, res) => {
         });
 };
 
+// * Update user info
 module.exports.updatePersonalUser = async (req, res) => {
     const { id } = req.params;
     const { errors, isValid } = await ValidatePutPersonalInput(req.body);
@@ -154,6 +159,10 @@ module.exports.updatePersonalUser = async (req, res) => {
 
             Object.keys(req.body).forEach(field => {
                 user[field] = req.body[field];
+
+                if (field === 'DOB') {
+                    user['DOB'] = moment(req.body.DOB).format('DD/MM/YYYY');
+                }
             });
 
             user.save()
@@ -250,4 +259,27 @@ module.exports.uploadAvatar = (req, res, next) => {
 
             res.status(200).json({ message: err.message });
         });
+};
+
+// * Get history trip
+module.exports.getHistoryTrip = (req, res, next) => {
+    const userID = req.user.id;
+    Trip.find()
+        .populate('driverID', 'fullName')
+        .then(trips => {
+            let userTripHistory = [];
+
+            _.forEach(trips, trip => {
+                if (!trip.isFinished) return;
+
+                _.forEach(trip.passengers, passenger => {
+                    if (passenger.passengerID == userID) {
+                        userTripHistory.push(trip);
+                    }
+                });
+            });
+
+            res.status(200).json(userTripHistory);
+        })
+        .catch(err => res.json(err));
 };

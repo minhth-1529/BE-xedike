@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const userRouter = require('./routers/api/User');
 const tripRouter = require('./routers/api/Trip');
 const provinceRouter = require('./routers/api/Province');
+const carRouter = require('./routers/api/Car');
 
 mongoose
     .connect('mongodb://localhost:27017/prj-xedike', {
@@ -41,6 +42,7 @@ app.use(express.json());
 app.use('/api/users', userRouter);
 app.use('/api/trips', tripRouter);
 app.use('/api/provinces', provinceRouter);
+app.use('/api/cars', carRouter);
 
 app.listen(port, () => {
     console.log(`Server running!!!!!!!!! ${port}`);
