@@ -14,6 +14,11 @@ router.post('/search?:queryString', tripController.searchTrips);
 // router.get('/:id', tripController.getDetailTrip);
 // router.post('/:id', tripController.deleteTrip);
 router.put('/booking-trip/:id', authenticate, tripController.bookingTrip);
-// router.put('/finish-trip/:id', authenticate, tripController.finishTrip);
+router.put(
+    '/finish-trip/:id',
+    authenticate,
+    authorize(['passenger']),
+    tripController.finishTrip
+);
 
 module.exports = router;

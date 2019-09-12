@@ -8,7 +8,8 @@ const UserSchema = new mongoose.Schema({
     phoneNumber: { type: String },
     registerDate: { type: Date, default: Date.now() },
     avatar: { type: String },
-    fullName: { type: String }
+    fullName: { type: String },
+    rate: { type: Number, default: 0 },
 });
 
 const User = mongoose.model('User', UserSchema, 'User');

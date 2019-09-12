@@ -116,7 +116,10 @@ module.exports.getDetailUser = (req, res, next) => {
 module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
     const { errors, isValid } = await ValidatePutPasswordInput(req.body);
-    const { password } = req.body;
+    const { password, newPassword, verifyNewPassword } = req.body;
+    console.log("TCL: module.exports.updatePasswordUser -> verifyNewPassword", verifyNewPassword)
+    console.log("TCL: module.exports.updatePasswordUser -> newPassword", newPassword)
+    console.log("TCL: module.exports.updatePasswordUser -> password", password)
 
     User.findById(id)
         .then(user => {
@@ -124,7 +127,7 @@ module.exports.updatePasswordUser = async (req, res) => {
 
             bcryptjs.compare(password, user.password, (err, isMatch) => {
                 if (!isMatch)
-                    return res.status(404).json('Password is incorrect!');
+                    return res.status(400).json({password: 'Password is incorrect!'});
 
                 bcryptjs.genSalt(10, (err, salt) => {
                     if (err) return res.json(err);
@@ -165,16 +168,15 @@ module.exports.updatePersonalUser = async (req, res) => {
                 }
             });
 
-            user.save()
-                .then(user => {
-                    res.status(201).json(user);
-                })
-                .catch(err => res.json(err));
+            return user.save();
+        })
+        .then(user => {
+            res.status(201).json(user);
         })
         .catch(err => {
             if (!err.status) return res.json(err);
 
-            res.status(err.status).json(err.message);
+            res.status(err.status).json(err);
         });
 };
 
@@ -195,7 +197,7 @@ module.exports.login = (req, res, next) => {
         .then(user => {
             if (!user)
                 return Promise.reject({
-                    status: 404,
+                    status: 400,
                     message: 'Wrong email or password'
                 });
 
@@ -270,8 +272,6 @@ module.exports.getHistoryTrip = (req, res, next) => {
             let userTripHistory = [];
 
             _.forEach(trips, trip => {
-                if (!trip.isFinished) return;
-
                 _.forEach(trip.passengers, passenger => {
                     if (passenger.passengerID == userID) {
                         userTripHistory.push(trip);
@@ -282,4 +282,31 @@ module.exports.getHistoryTrip = (req, res, next) => {
             res.status(200).json(userTripHistory);
         })
         .catch(err => res.json(err));
+};
+
+module.exports.ratingDriver = (req, res, next) => {
+    const { userType } = req.user;
+    const { id } = req.params;
+    const { rate } = req.body;
+
+    User.findById(id)
+        .then(res => {
+            if (userType !== 'passenger')
+                return Promise.reject({
+                    status: 400,
+                    message: 'Only passenger can rating'
+                });
+
+            res.rate = parseInt(rate);
+
+            return res.save();
+        })
+        .then(user => {
+            res.status(201).json(user);
+        })
+        .catch(err => {
+            if (!err.status) return res.json(err);
+
+            res.status(err.status).json(err.message)
+        });
 };

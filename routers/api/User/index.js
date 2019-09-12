@@ -10,6 +10,12 @@ router.post('/', userController.createUser);
 router.get('/:id', userController.getDetailUser);
 router.put('/personal/:id', userController.updatePersonalUser);
 router.put('/password/:id', userController.updatePasswordUser);
+router.put(
+    '/rating/:id',
+    authenticate,
+    authorize(['passenger']),
+    userController.ratingDriver
+);
 
 router.delete(
     '/:id',
