@@ -71,47 +71,6 @@ module.exports.getDetailUser = (req, res, next) => {
         });
 };
 
-// * Update user
-// module.exports.updateUser = async (req, res, next) => {
-//     const { id } = req.params;
-//     const { errors, isValid } = await ValidatePutPersonalInput(req.body);
-//     const { password, newPassword } = req.body;
-
-//     User.findById(id)
-//         .then(user => {
-//             Object.keys(req.body).forEach(field => {
-//                 user[field] = req.body[field];
-//             });
-
-//             if (!isValid) return res.status(400).json(errors);
-
-//             bcryptjs.compare(password, user.password, (err, isMatch) => {
-//                 if (!isMatch)
-//                     return res.status(404).json('Password is incorrect!');
-
-//                 bcryptjs.genSalt(10, (err, salt) => {
-//                     if (err) return res.json(err);
-//                     bcryptjs.hash(newPassword, salt, (err, hash) => {
-//                         if (err) return res.json(err);
-
-//                         user.password = hash;
-
-//                         user.save()
-//                             .then(user => {
-//                                 res.status(204).json(user);
-//                             })
-//                             .catch(err => res.json(err));
-//                     });
-//                 });
-//             });
-//         })
-//         .catch(err => {
-//             if (!err.status) return res.json(err);
-
-//             res.status(err.status).json(err.message);
-//         });
-// };
-
 // * Update user password
 module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
@@ -267,7 +226,7 @@ module.exports.uploadAvatar = (req, res, next) => {
 module.exports.getHistoryTrip = (req, res, next) => {
     const userID = req.user.id;
     Trip.find()
-        .populate('driverID', 'fullName')
+        .populate('driverID')
         .then(trips => {
             let userTripHistory = [];
 

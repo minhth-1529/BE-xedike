@@ -15,7 +15,6 @@ module.exports.getDetailTrip = (req, res, next) => {
     const { id } = req.params;
 
     Trip.findById(id)
-        // .populate('id', 'avatar') lay avatar
         .populate('driverID')
         .then(trip => {
             res.status(200).json(trip);
@@ -28,7 +27,7 @@ module.exports.getDetailTrip = (req, res, next) => {
 // * Get trips
 module.exports.getTrip = (req, res, next) => {
     Trip.find()
-        .populate('driverID', 'fullName')
+        .populate('driverID')
         .then(trips => {
             res.status(200).json(trips);
         })
@@ -127,6 +126,7 @@ module.exports.searchTrips = (req, res, next) => {
         .and([
             { locationFrom: queryString.from },
             { locationTo: queryString.to }
+            // TODO search
             // { availableSeats: { $gte: parseInt(queryString.slot) } }
             // { startTime: { $gte: parseInt(queryString.startTime) } }
         ])
