@@ -1,6 +1,7 @@
 const { Trip } = require('../../../models/Trip');
 const url = require('url');
 const _ = require('lodash');
+const moment = require('moment');
 
 // * Delete Trip
 module.exports.deleteTrip = (req, res, next) => {
@@ -49,7 +50,7 @@ module.exports.createTrips = (req, res, next) => {
     const newTrip = new Trip({
         locationFrom,
         locationTo,
-        startTime,
+        startTime: parseInt(moment(startTime).valueOf()),
         availableSeats,
         fee,
         driverID
@@ -115,7 +116,7 @@ module.exports.finishTrip = (req, res, next) => {
         .catch(err => res.json(err));
 };
 
-// * Search
+// * Search trip
 module.exports.searchTrips = (req, res, next) => {
     let queryString = url.parse(
         req.url.substring(0, req.url.lastIndexOf('/')),
@@ -125,10 +126,9 @@ module.exports.searchTrips = (req, res, next) => {
     Trip.find()
         .and([
             { locationFrom: queryString.from },
-            { locationTo: queryString.to }
-            // TODO search
-            // { availableSeats: { $gte: parseInt(queryString.slot) } }
-            // { startTime: { $gte: parseInt(queryString.startTime) } }
+            { locationTo: queryString.to },
+            { availableSeats: { $gte: parseInt(queryString.slot) } },
+            { startTime: { $gte: parseInt(moment(queryString.startTime).valueOf()) } }
         ])
         .populate('driverID', 'fullName')
         .then(trip => {

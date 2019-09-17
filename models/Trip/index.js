@@ -7,7 +7,7 @@ const TripSchema = new mongoose.Schema({
     },
     locationFrom: String,
     locationTo: String,
-    startTime: Date,
+    startTime: Number,
     availableSeats: Number,
     fee: Number,
     passengers: [

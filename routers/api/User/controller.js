@@ -76,9 +76,15 @@ module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
     const { errors, isValid } = await ValidatePutPasswordInput(req.body);
     const { password, newPassword, verifyNewPassword } = req.body;
-    console.log("TCL: module.exports.updatePasswordUser -> verifyNewPassword", verifyNewPassword)
-    console.log("TCL: module.exports.updatePasswordUser -> newPassword", newPassword)
-    console.log("TCL: module.exports.updatePasswordUser -> password", password)
+    console.log(
+        'TCL: module.exports.updatePasswordUser -> verifyNewPassword',
+        verifyNewPassword
+    );
+    console.log(
+        'TCL: module.exports.updatePasswordUser -> newPassword',
+        newPassword
+    );
+    console.log('TCL: module.exports.updatePasswordUser -> password', password);
 
     User.findById(id)
         .then(user => {
@@ -86,7 +92,9 @@ module.exports.updatePasswordUser = async (req, res) => {
 
             bcryptjs.compare(password, user.password, (err, isMatch) => {
                 if (!isMatch)
-                    return res.status(400).json({password: 'Password is incorrect!'});
+                    return res
+                        .status(400)
+                        .json({ password: 'Password is incorrect!' });
 
                 bcryptjs.genSalt(10, (err, salt) => {
                     if (err) return res.json(err);
@@ -199,15 +207,9 @@ module.exports.login = (req, res, next) => {
 // * Upload avatar user
 module.exports.uploadAvatar = (req, res, next) => {
     const { id } = req.params;
-
+    console.log(req)
     User.findById(id)
         .then(user => {
-            if (!user)
-                return Promise.reject({
-                    status: 404,
-                    message: 'user not found'
-                });
-
             user.avatar = req.file.path;
 
             return user.save();
@@ -266,6 +268,6 @@ module.exports.ratingDriver = (req, res, next) => {
         .catch(err => {
             if (!err.status) return res.json(err);
 
-            res.status(err.status).json(err.message)
+            res.status(err.status).json(err.message);
         });
 };

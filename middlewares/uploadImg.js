@@ -6,7 +6,7 @@ const uploadImage = type => {
             cb(null, `./uploads/${type}s`);
         },
         filename: function(req, file, cb) {
-            cb(null, file.originalname + '-' + Date.now());
+            cb(null, Date.now() + '-' + file.originalname);
         }
     });
     const upload = multer({ storage: storage });
