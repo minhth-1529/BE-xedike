@@ -207,7 +207,7 @@ module.exports.login = (req, res, next) => {
 // * Upload avatar user
 module.exports.uploadAvatar = (req, res, next) => {
     const { id } = req.params;
-    console.log(req)
+
     User.findById(id)
         .then(user => {
             user.avatar = req.file.path;
