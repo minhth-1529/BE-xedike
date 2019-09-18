@@ -24,6 +24,8 @@ const app = express();
 
 const port = process.env.PORT || 5000;
 
+app.use('/', express.static('public'));
+
 //middleware serve static files
 app.use('/uploads/avatars', express.static('./uploads/avatars'));
 
