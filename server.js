@@ -5,8 +5,14 @@ const tripRouter = require('./routers/api/Trip');
 const provinceRouter = require('./routers/api/Province');
 const carRouter = require('./routers/api/Car');
 
+require('dotenv').config();
+const mongoUri =
+    process.env.NODE_ENV === 'dev'
+        ? process.env.MONGO_URI_DEV
+        : process.env.MONGO_URI_PROD;
+
 mongoose
-    .connect('mongodb://localhost:27017/prj-xedike', {
+    .connect(mongoUri, {
         useNewUrlParser: true,
         useCreateIndex: true
     })
