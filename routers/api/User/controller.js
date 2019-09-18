@@ -176,7 +176,8 @@ module.exports.login = (req, res, next) => {
                     email: user.email,
                     userType: user.userType,
                     id: user._id,
-                    fullName: user.fullName
+                    fullName: user.fullName,
+                    avatar: user.avatar
                 };
 
                 jwt.sign(
