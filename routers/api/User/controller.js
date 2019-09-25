@@ -203,7 +203,7 @@ module.exports.uploadAvatar = (req, res, next) => {
 
     User.findById(id)
         .then(user => {
-            user.avatar = req.file.path;
+            user.avatar = req.file.location;
 
             return user.save();
         })

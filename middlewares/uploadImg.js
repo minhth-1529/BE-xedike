@@ -3,16 +3,11 @@ const multerS3 = require('multer-s3');
 const aws = require('aws-sdk');
 
 aws.config.update({
-    secretAccessKey: '03+7CZOVKk10Y83a+NJQcp36jHkZV34j5yIvBfnx',
-    accessKeyId: 'AKIAJ742DQH6M5J5SWEA',
+    secretAccessKey: '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',
+    accessKeyId: 'AKIAITNCYCDSL6II4PLA',
     region: 'us-east-2',
     signatureVersion: 'v4'
 });
-
-// Access Key ID:
-// AKIAJ742DQH6M5J5SWEA
-// Secret Access Key:
-// 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
 
 const uploadImage = type => {
     const upload = multer({
@@ -25,7 +20,7 @@ const uploadImage = type => {
             },
             key: function(req, file, cb) {
                 if (file.mimetype === 'application/octet-stream') type = '.jpg';
-                cb(null, type + '/' +  Date.now() + '-' + file.originalname);
+                cb(null, type + '/' + Date.now() + '-' + file.originalname);
             }
         })
     });
