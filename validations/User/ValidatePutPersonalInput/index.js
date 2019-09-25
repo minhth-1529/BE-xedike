@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const validator = require('validator');
+const { User } = require('../../../models/User');
 
 const validatePostInput = async data => {
     let errors = {};
@@ -16,6 +17,11 @@ const validatePostInput = async data => {
         errors.email = 'Email invalid';
     }
     // TODO check email
+    // id = _id
+    // User.findOne({id:{$ne: id}, email: email})
+    //     .then(user => {
+    //         if(!user) return fail
+    //     })
     // else {
     //     const user = await User.findOne({ email: data.email });
     //     if (user) errors.email = 'This email already exists';
@@ -29,6 +35,9 @@ const validatePostInput = async data => {
     // * Phone number
     if (validator.isEmpty(data.phoneNumber)) {
         errors.phoneNumber = 'Phone number is required';
+    } else {
+        const user = await User.findOne({ phoneNumber: data.phoneNumber });
+        if (user) errors.phoneNumber = 'Phone number already exists';
     }
 
     // * DOB

@@ -27,8 +27,11 @@ module.exports.getDetailTrip = (req, res, next) => {
 
 // * Get trips
 module.exports.getTrip = (req, res, next) => {
+    const { limit } = req.params;
+
     Trip.find()
         .populate('driverID')
+        .limit(parseInt(limit))
         .then(trips => {
             res.status(200).json(trips);
         })
@@ -106,6 +109,7 @@ module.exports.finishTrip = (req, res, next) => {
     const { id } = req.params;
 
     Trip.findById(id)
+        .populate('driverID')
         .then(trip => {
             trip.isFinished = true;
             return trip.save();
@@ -128,7 +132,11 @@ module.exports.searchTrips = (req, res, next) => {
             { locationFrom: queryString.from },
             { locationTo: queryString.to },
             { availableSeats: { $gte: parseInt(queryString.slot) } },
-            { startTime: { $gte: parseInt(moment(queryString.startTime).valueOf()) } }
+            {
+                startTime: {
+                    $gte: parseInt(moment(queryString.startTime).valueOf())
+                }
+            }
         ])
         .populate('driverID', 'fullName')
         .then(trip => {

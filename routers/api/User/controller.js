@@ -58,13 +58,13 @@ module.exports.getDetailUser = (req, res, next) => {
     const { id } = req.params;
 
     Promise.all([
-        User.findById(id).select('-password -userType -_id -__v'),
+        User.findById(id).select('-password -__v'),
         Car.find({ driverID: id })
     ])
         .then(results => {
             const [user, cars] = results;
 
-            res.status(200).json({ user: user, cars: cars });
+            res.status(201).json({ user: user, cars: cars });
         })
         .catch(err => {
             res.status(err.status).json(err);
@@ -76,15 +76,6 @@ module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
     const { errors, isValid } = await ValidatePutPasswordInput(req.body);
     const { password, newPassword, verifyNewPassword } = req.body;
-    console.log(
-        'TCL: module.exports.updatePasswordUser -> verifyNewPassword',
-        verifyNewPassword
-    );
-    console.log(
-        'TCL: module.exports.updatePasswordUser -> newPassword',
-        newPassword
-    );
-    console.log('TCL: module.exports.updatePasswordUser -> password', password);
 
     User.findById(id)
         .then(user => {
@@ -124,6 +115,7 @@ module.exports.updatePersonalUser = async (req, res) => {
     const { errors, isValid } = await ValidatePutPersonalInput(req.body);
 
     User.findById(id)
+        .select('-password -__v')
         .then(user => {
             if (!isValid) return res.status(400).json(errors);
 
