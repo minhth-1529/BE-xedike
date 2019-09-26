@@ -30,7 +30,8 @@ module.exports.getTrip = (req, res, next) => {
     const { limit } = req.params;
 
     Trip.find()
-        .populate('driverID')
+        .select('locationFrom locationTo availableSeats _id fee')
+        .populate('driverID', 'fullName rate')
         .limit(parseInt(limit))
         .then(trips => {
             res.status(200).json(trips);
@@ -60,6 +61,7 @@ module.exports.createTrips = (req, res, next) => {
     });
 
     newTrip
+    .populate('driverID', 'fullName rate')
         .save()
         .then(user => {
             res.status(200).json(user);
