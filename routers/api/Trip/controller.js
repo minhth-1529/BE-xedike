@@ -41,30 +41,33 @@ module.exports.getTrip = (req, res, next) => {
 
 // * Create trip
 module.exports.createTrips = (req, res, next) => {
-    const {
-        locationFrom,
-        locationTo,
-        startTime,
-        availableSeats,
-        fee
-    } = req.body;
+    const { locationFrom, locationTo, availableSeats, fee } = req.body;
+
+    let { startTime } = req.body;
 
     const driverID = req.user.id;
+
+    let date = new Date('12/08/2019');
+    startTime = date.getTime();
 
     const newTrip = new Trip({
         locationFrom,
         locationTo,
-        startTime: parseInt(moment(startTime).valueOf()),
+        startTime,
         availableSeats,
         fee,
         driverID
     });
 
     newTrip
-    .populate('driverID', 'fullName rate')
         .save()
-        .then(user => {
-            res.status(200).json(user);
+        .then(trip => {
+            return Trip.findById(trip._id)
+                .populate('driverID', 'fullName rate')
+                .select('-__v');
+        })
+        .then(result => {
+            res.status(200).json(result);
         })
         .catch(err => res.json(err));
 };
