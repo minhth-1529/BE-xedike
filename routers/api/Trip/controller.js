@@ -30,7 +30,7 @@ module.exports.getTrip = (req, res, next) => {
     const { limit } = req.params;
 
     Trip.find()
-        .select('locationFrom locationTo availableSeats _id fee')
+        .select('locationFrom locationTo availableSeats _id fee startTime')
         .populate('driverID', 'fullName rate')
         .limit(parseInt(limit))
         .then(trips => {
@@ -47,7 +47,7 @@ module.exports.createTrips = (req, res, next) => {
 
     const driverID = req.user.id;
 
-    let date = new Date('12/08/2019');
+    let date = new Date(startTime);
     startTime = date.getTime();
 
     const newTrip = new Trip({
