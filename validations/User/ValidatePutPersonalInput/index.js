@@ -2,7 +2,7 @@ const _ = require('lodash');
 const validator = require('validator');
 const { User } = require('../../../models/User');
 
-const validatePostInput = async data => {
+const validatePostInput = async (data, id) => {
     let errors = {};
 
     data.email = _.get(data, 'email', '');
@@ -15,17 +15,13 @@ const validatePostInput = async data => {
         errors.email = 'Email is required';
     } else if (!validator.isEmail(data.email)) {
         errors.email = 'Email invalid';
+    } else {
+        const user = await User.findOne({
+            _id: { $ne: id },
+            email: data.email
+        });
+        if (user) errors.email = 'This email already exists';
     }
-    // TODO check email
-    // id = _id
-    // User.findOne({id:{$ne: id}, email: email})
-    //     .then(user => {
-    //         if(!user) return fail
-    //     })
-    // else {
-    //     const user = await User.findOne({ email: data.email });
-    //     if (user) errors.email = 'This email already exists';
-    // }
 
     // * Full name
     if (validator.isEmpty(data.fullName)) {
@@ -36,8 +32,13 @@ const validatePostInput = async data => {
     if (validator.isEmpty(data.phoneNumber)) {
         errors.phoneNumber = 'Phone number is required';
     } else {
-        const user = await User.findOne({ phoneNumber: data.phoneNumber });
-        if (user) errors.phoneNumber = 'Phone number already exists';
+        const user = await User.findOne({
+            _id: { $ne: id },
+            phoneNumber: data.phoneNumber
+        });
+        if (user) {
+            errors.phoneNumber = 'Phone number already exists';
+        }
     }
 
     // * DOB

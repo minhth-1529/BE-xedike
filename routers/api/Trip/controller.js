@@ -120,7 +120,7 @@ module.exports.finishTrip = (req, res, next) => {
             return trip.save();
         })
         .then(trip => {
-            res.status(200).json(trip);
+            res.status(201).json(trip);
         })
         .catch(err => res.json(err));
 };

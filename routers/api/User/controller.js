@@ -76,10 +76,13 @@ module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
     const { errors, isValid } = await ValidatePutPasswordInput(req.body);
     const { password, newPassword, verifyNewPassword } = req.body;
-
+    // TODO verifyNewPassword
     User.findById(id)
         .then(user => {
-            if (!isValid) return res.status(400).json(errors);
+            if (!isValid) return Promise.reject({
+                status: 400,
+                message: errors
+            });
 
             bcryptjs.compare(password, user.password, (err, isMatch) => {
                 if (!isMatch)
@@ -112,12 +115,16 @@ module.exports.updatePasswordUser = async (req, res) => {
 // * Update user info
 module.exports.updatePersonalUser = async (req, res) => {
     const { id } = req.params;
-    const { errors, isValid } = await ValidatePutPersonalInput(req.body);
+    const { errors, isValid } = await ValidatePutPersonalInput(req.body, id);
 
     User.findById(id)
         .select('-password -__v')
         .then(user => {
-            if (!isValid) return res.status(400).json(errors);
+            if (!isValid)
+                return Promise.reject({
+                    status: 400,
+                    message: errors
+                });
 
             Object.keys(req.body).forEach(field => {
                 user[field] = req.body[field];
@@ -135,7 +142,7 @@ module.exports.updatePersonalUser = async (req, res) => {
         .catch(err => {
             if (!err.status) return res.json(err);
 
-            res.status(err.status).json(err);
+            res.status(err.status).json(err.message);
         });
 };
 
@@ -211,8 +218,6 @@ module.exports.uploadAvatar = (req, res, next) => {
             res.status(200).json(user);
         })
         .catch(err => {
-            if (!err.status) return res.json(err);
-
             res.status(200).json({ message: err.message });
         });
 };
@@ -220,6 +225,7 @@ module.exports.uploadAvatar = (req, res, next) => {
 // * Get history trip
 module.exports.getHistoryTrip = (req, res, next) => {
     const userID = req.user.id;
+
     Trip.find()
         .populate('driverID')
         .then(trips => {
