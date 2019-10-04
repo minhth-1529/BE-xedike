@@ -132,6 +132,9 @@ module.exports.searchTrips = (req, res, next) => {
         true
     ).query;
 
+    let date = new Date(queryString.startTime);
+    const startTime = date.getTime();
+
     Trip.find()
         .and([
             { locationFrom: queryString.from },
@@ -139,7 +142,7 @@ module.exports.searchTrips = (req, res, next) => {
             { availableSeats: { $gte: parseInt(queryString.slot) } },
             {
                 startTime: {
-                    $gte: parseInt(moment(queryString.startTime).valueOf())
+                    $gte: startTime
                 }
             }
         ])
