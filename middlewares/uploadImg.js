@@ -13,7 +13,7 @@ const uploadImage = type => {
     const upload = multer({
         storage: multerS3({
             s3: new aws.S3(),
-            bucket: 'xedike-upload',
+            bucket: 'upload-xedike',
             acl: 'public-read',
             metadata: function(req, file, cb) {
                 cb(undefined, { fieldName: 'META_DATA' });
