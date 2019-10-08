@@ -146,7 +146,7 @@ module.exports.searchTrips = (req, res, next) => {
                 }
             }
         ])
-        .populate('driverID', 'fullName')
+        .populate('driverID', 'fullName rate')
         .then(trip => {
             if (_.isEmpty(trip))
                 return Promise.reject({ status: 404, message: 'Not found!' });
