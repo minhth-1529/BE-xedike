@@ -9,7 +9,9 @@ router.post(
     authorize(['driver']),
     tripController.createTrips
 );
-router.get('/:limit', tripController.getTrip);
+router.get('/count-trip', tripController.getCountTrips);
+router.get('/get-all/:limit', tripController.getTrips);
+router.post('/count/search?:queryString', tripController.searchCountTrips);
 router.post('/search?:queryString', tripController.searchTrips);
 router.get('/detail/:id', tripController.getDetailTrip);
 // router.post('/:id', tripController.deleteTrip);

@@ -26,7 +26,7 @@ module.exports.getDetailTrip = (req, res, next) => {
 };
 
 // * Get trips
-module.exports.getTrip = (req, res, next) => {
+module.exports.getTrips = (req, res, next) => {
     const { limit } = req.params;
 
     Trip.find()
@@ -35,6 +35,15 @@ module.exports.getTrip = (req, res, next) => {
         .limit(parseInt(limit))
         .then(trips => {
             res.status(200).json(trips);
+        })
+        .catch(err => res.json(err));
+};
+
+// * Get count trips
+module.exports.getCountTrips = (req, res, next) => {
+    Trip.find()
+        .then(trips => {
+            res.status(200).json(trips.length);
         })
         .catch(err => res.json(err));
 };
@@ -131,8 +140,8 @@ module.exports.searchTrips = (req, res, next) => {
         req.url.substring(0, req.url.lastIndexOf('/')),
         true
     ).query;
-
     let date = new Date(queryString.startTime);
+
     const startTime = date.getTime();
 
     Trip.find()
@@ -147,11 +156,47 @@ module.exports.searchTrips = (req, res, next) => {
             }
         ])
         .populate('driverID', 'fullName rate')
+        .limit(5)
+        .skip(parseInt(queryString.page) * 5)
         .then(trip => {
             if (_.isEmpty(trip))
                 return Promise.reject({ status: 404, message: 'Not found!' });
 
             res.status(200).json(trip);
+        })
+        .catch(err => {
+            if (!err.status) return res.json(err);
+
+            res.status(err.status).json({ message: err.message });
+        });
+};
+
+// * Search count trip
+module.exports.searchCountTrips = (req, res, next) => {
+    let queryString = url.parse(
+        req.url.substring(0, req.url.lastIndexOf('/')),
+        true
+    ).query;
+    let date = new Date(queryString.startTime);
+
+    const startTime = date.getTime();
+
+    Trip.find()
+        .and([
+            { locationFrom: queryString.from },
+            { locationTo: queryString.to },
+            { availableSeats: { $gte: parseInt(queryString.slot) } },
+            {
+                startTime: {
+                    $gte: startTime
+                }
+            }
+        ])
+        .then(trip => {
+            if (_.isEmpty(trip))
+                return Promise.reject({ status: 404, message: 'Not found!' });
+
+            res.status(200).json(trip.length);
         })
         .catch(err => {
             if (!err.status) return res.json(err);
