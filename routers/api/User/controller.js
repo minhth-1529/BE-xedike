@@ -75,14 +75,15 @@ module.exports.getDetailUser = (req, res, next) => {
 module.exports.updatePasswordUser = async (req, res) => {
     const { id } = req.params;
     const { errors, isValid } = await ValidatePutPasswordInput(req.body);
-    const { password, newPassword, verifyNewPassword } = req.body;
-    // TODO verifyNewPassword
+    const { password, newPassword } = req.body;
+
     User.findById(id)
         .then(user => {
-            if (!isValid) return Promise.reject({
-                status: 400,
-                message: errors
-            });
+            if (!isValid)
+                return Promise.reject({
+                    status: 400,
+                    message: errors
+                });
 
             bcryptjs.compare(password, user.password, (err, isMatch) => {
                 if (!isMatch)
